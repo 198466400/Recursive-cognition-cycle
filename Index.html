@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recursive Cognition Cycle (RCC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Non‑linear Recursive Cognition Cycle model." />
+
+  <style>
+    :root {
+      --bg: #050608;
+      --bg-alt: #0b0d12;
+      --accent: #4fd1c5;
+      --accent-soft: rgba(79, 209, 197, 0.15);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2933;
+      --danger: #f97373;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 18px 64px;
+    }
+
+    header {
+      padding: 18px 0 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-size: 2.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    .badge-row {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+    }
+
+    .badge.accent {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 840px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    section {
+      margin-bottom: 24px;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, var(--bg-alt), #020617);
+      padding: 18px 16px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(79, 209, 197, 0.12), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(79, 209, 197, 0.08), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .card-tag {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card-body {
+      position: relative;
+      z-index: 1;
+      font-size: 0.95rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .pill-danger .pill-dot {
+      background: var(--danger);
+    }
+
+    .pill-danger {
+      border-color: rgba(248, 113, 113, 0.6);
+      color: var(--danger);
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    ul, ol {
+      margin: 8px 0 8px 18px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .diagram {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .node {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 10px 9px;
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .node-label {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    .node-body {
+      color: var(--muted);
+    }
+
+    .node-arrow {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .timeline {
+      margin-top: 8px;
+      border-left: 1px dashed var(--border);
+      padding-left: 12px;
+    }
+
+    .timeline-step {
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .timeline-step::before {
+      content: "";
+      position: absolute;
+      left: -7px;
+      top: 4px;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .timeline-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .timeline-body {
+      font-size: 0.9rem;
+    }
+
+    footer {
+      margin-top: 32px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-right {
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      footer {
+        flex-direction: column;
+      }
+      .footer-right {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title">Recursive Cognition Cycle</div>
+      <div class="subtitle">
+        A non‑linear loop for how an agent observes, interprets, updates itself, and acts—then re‑enters the cycle with new state.
+      </div>
+      <div class="badge-row">
+        <span class="badge accent">Non‑linear · Recursive · Adaptive</span>
+        <span class="badge">Model: RCC</span>
+        <span class="badge">Author: Dakota</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT COLUMN: Concept -->
+      <div>
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Concept overview</div>
+            <div class="card-tag">RCC core</div>
+          </div>
+          <div class="card-body">
+            <div class="pill">
+              <span class="pill-dot"></span>
+              <span>Non‑linear state transitions</span>
+            </div>
+
+            <p>
+              The <strong>Recursive Cognition Cycle (RCC)</strong> is a loop where an agent repeatedly:
+              samples reality, evaluates it against internal models, updates those models, and chooses actions.
+              The cycle is <strong>non‑linear</strong>: any phase can trigger a jump to another phase or a full reset,
+              depending on context, uncertainty, or new information.
+            </p>
+
+            <ul>
+              <li><strong>Stateful:</strong> each pass through the cycle mutates the agent’s internal state.</li>
+              <li><strong>Recursive:</strong> outputs of one cycle become inputs to the next.</li>
+              <li><strong>Context‑driven:</strong> transitions are governed by rules, thresholds, or heuristics.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Cycle phases</div>
+            <div class="card-tag">Phase definitions</div>
+          </div>
+          <div class="card-body">
+            <div class="diagram">
+              <div class="node">
+                <div class="node-label">1 · Perception</div>
+                <div class="node-arrow">⇢</div>
+                <div class="node-body">
+                  Raw input from environment, memory, or other agents.
+                  Noise, ambiguity, and gaps are preserved—not magically cleaned.
+                </div>
+              </div>
+
+              <div class="node">
+                <div class="node-label">2 · Interpretation</div>
+                <div class="node-arrow">⇢</div>
+                <div class="node-body">
+                  Map inputs onto existing beliefs, schemas, and narratives.
+                  Detect conflicts, anomalies, and pattern breaks.
+                </div>
+              </div>
+
+              <div class="node">
+                <div class="node-label">3 · Self‑update</div>
+                <div class="node-arrow">⇢</div>
+                <div class="node-body">
+                  Adjust internal models: beliefs, priorities, risk estimates, identity stories.
+                  This is where the agent actually changes.
+                </div>
+              </div>
+
+              <div class="node">
+                <div class="node-label">4 · Action</div>
+                <div class="node-arrow">⇢</div>
+                <div class="node-body">
+                  Choose and execute behavior in the world or internally
+                  (e.g., deciding not to act is still an action).
+                </div>
+              </div>
+            </div>
+
+            <p style="margin-top: 12px;">
+              In a strictly linear system, the cycle would always be
+              <em>Perception → Interpretation → Self‑update → Action → Perception</em>.
+              RCC relaxes that constraint and allows jumps, loops, and short‑circuits.
+            </p>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Non‑linear transitions</div>
+            <div class="card-tag">Graph logic</div>
+          </div>
+          <div class="card-body">
+            <div class="pill pill-danger">
+              <span class="pill-dot"></span>
+              <span>Short‑circuits & feedback spikes</span>
+            </div>
+
+            <p>
+              Instead of a single fixed loop, RCC is a <strong>directed graph</strong> of possible transitions.
+              Edges are activated by conditions like uncertainty, emotional load, or external constraints.
+            </p>
+
+            <ul>
+              <li><strong>Perception → Action:</strong> reflexive behavior without deep interpretation.</li>
+              <li><strong>Interpretation → Interpretation:</strong> rumination or re‑framing loops.</li>
+              <li><strong>Action → Self‑update:</strong> identity shifts driven by what the agent just did.</li>
+              <li><strong>Self‑update → Perception:</strong> seeing the same world differently after a belief change.</li>
+            </ul>
+
+            <p>
+              The “cycle” is therefore not a circle but a <strong>dynamic network</strong> that the agent
+              traverses over time, recursively folding new outcomes back into future passes.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Implementation / Notes -->
+      <div>
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">RCC as a system</div>
+            <div class="card-tag">Implementation lens</div>
+          </div>
+          <div class="card-body">
+            <p>
+              You can treat RCC as an architecture pattern for agents, algorithms, or workflows:
+            </p>
+            <ol>
+              <li><strong>Define state:</strong> what the agent “is” at any moment (beliefs, goals, memory).</li>
+              <li><strong>Define phases:</strong> perception, interpretation, self‑update, action.</li>
+              <li><strong>Define edges:</strong> rules that decide which phase comes next.</li>
+              <li><strong>Run recursively:</strong> each completed pass feeds the next as updated state.</li>
+            </ol>
+
+            <p>
+              This page is intentionally abstract so you can plug RCC into code, behavior models,
+              or personal reflection without changing the core idea.
+            </p>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Example traversal</div>
+            <div class="card-tag">Narrative trace</div>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-step">
+                <div class="timeline-label">Step A · Perception</div>
+                <div class="timeline-body">
+                  Agent receives conflicting feedback: “You’re doing great” and “You missed the mark.”
+                </div>
+              </div>
+
+              <div class="timeline-step">
+                <div class="timeline-label">Step B · Interpretation → Interpretation</div>
+                <div class="timeline-body">
+                  Agent loops, trying different narratives: “I’m improving” vs “I’m failing.”
+                  The loop continues until uncertainty drops below a threshold.
+                </div>
+              </div>
+
+              <div class="timeline-step">
+                <div class="timeline-label">Step C · Self‑update</div>
+                <div class="timeline-body">
+                  Agent updates its model: “I’m capable but inconsistent; I need structure.”
+                  This becomes part of its identity and future expectations.
+                </div>
+              </div>
+
+              <div class="timeline-step">
+                <div class="timeline-label">Step D · Action → Self‑update</div>
+                <div class="timeline-body">
+                  Agent designs a new routine. Acting on it reinforces the updated identity,
+                  feeding back into the next cycle’s starting state.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Usage notes</div>
+            <div class="card-tag">GitHub Pages</div>
+          </div>
+          <div class="card-body">
+            <p>
+              Drop this file into your GitHub Pages repo as <code>index.html</code>.
+              You can rename titles, tweak colors, or add sections for math, code, or diagrams
+              that formalize your specific RCC implementation.
+            </p>
+            <p>
+              If you want, you can extend this with:
+            </p>
+            <ul>
+              <li><strong>Formal notation:</strong> define RCC as a state machine or Markov process.</li>
+              <li><strong>API docs:</strong> expose RCC as a service for other tools or agents.</li>
+              <li><strong>Personal log:</strong> track your own cycles over time as data.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div>
+        RCC · Non‑linear Recursive Cognition Cycle · Concept page
+      </div>
+      <div class="footer-right">
+        Built for GitHub Pages · Static HTML · No JS required
+      </div>
+    </footer>
+  </div>
+</body>
+                  </html>
